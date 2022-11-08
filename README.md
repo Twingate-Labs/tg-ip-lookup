@@ -29,7 +29,7 @@ For AWS, GCP, Azure and OCI this looks up the IPs using the publicly published I
 For the other providers it uses the MaxMind ASN database to lookup IP information.
 
 ### Setup
-1. Clone this repo: `git clone https://github.com/Twingate-Labs/tg-ip-lookup`
+1. Clone this repo: `git clone https://github.com/Twingate-Labs/tg-ip-lookup`, & switch into directory
 2. Install requirements (virtual env recommended), e.g. `pip install -r requirements.txt`
 3. Prepare the database `python cloudlookup/loadCloudProviderData.py *MaxMind License Key*`
 4. Try an IP lookup, e.g. `python lookup_ip.py XXX.XXX.XXX.XXX`
