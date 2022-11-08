@@ -19,15 +19,14 @@ def main(in_file, out_file, ip_field='external ip'):
 
     temp_file = NamedTemporaryFile(mode='w', delete=False)
 
-    with open(in_file, 'r') as csvfile, temp_file:
-        bar = IncrementalBar('Rows', max=len(csvfile.readlines())-1)
-        csvfile.seek(0)
-        reader = csv.DictReader(csvfile)
-        read_fields = reader.fieldnames
-        if ip_field not in read_fields:
+    with open(in_file, 'r') as csv_file, temp_file:
+        bar = IncrementalBar('Rows', max=len(csv_file.readlines())-1)
+        csv_file.seek(0)
+        reader = csv.DictReader(csv_file)
+        if ip_field not in reader.fieldnames:
             print(f'Column "{ip_field}" not found in file "{in_file}".')
             return
-        write_fields = read_fields.copy()
+        write_fields = reader.fieldnames.copy()
         write_fields.extend(['provider', 'region', 'asn_org'])
         writer = csv.DictWriter(temp_file, fieldnames=write_fields)
         writer.writeheader()
