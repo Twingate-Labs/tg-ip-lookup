@@ -4,11 +4,10 @@ from cloudlookup import CloudLookup
 
 def main(ip):
     cl = CloudLookup()
-    info = cl.lookup(ip)
-    if info is None:
-        print('Not found')
-        pass
-    print(info)
+    if info := cl.lookup(ip):
+        print(info)
+
+    print('Not found')
 
 
 if __name__ == "__main__":

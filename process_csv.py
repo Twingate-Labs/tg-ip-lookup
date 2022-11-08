@@ -1,9 +1,10 @@
-from cloudlookup import CloudLookup
 import csv
-from tempfile import NamedTemporaryFile
 import shutil
-from progress.bar import IncrementalBar
 from argparse import ArgumentParser
+from tempfile import NamedTemporaryFile
+
+from cloudlookup import CloudLookup
+from progress.bar import IncrementalBar
 
 
 read_fields = ['tenant id', 'tenant slug', 'network', 'connector', 'external ip']
@@ -14,15 +15,12 @@ def main(in_file, out_file, ip_field='external ip'):
     cl = CloudLookup()
 
     def process_row(row):
-        info = cl.lookup(row[ip_field])
-        if info is not None:
+        if info := cl.lookup(row[ip_field]):
             row['provider'] = info.get('provider', '')
             row['region'] = info.get('region', '')
             row['asn_org'] = info.get('asn_org', '')
         return row
 
-    #in_file = '/Users/emrul/Downloads/externalIps.csv'
-    #out_file = '/Users/emrul/Downloads/externalIps_emrul2.csv'
     temp_file = NamedTemporaryFile(mode='w', delete=False)
 
     with open(in_file, 'r') as csvfile, temp_file:
@@ -37,7 +35,7 @@ def main(in_file, out_file, ip_field='external ip'):
             csv_row = process_row(csv_row)
             writer.writerow(csv_row)
             bar.next()
-
+    bar.finish()
     shutil.move(temp_file.name, out_file)
 
 
