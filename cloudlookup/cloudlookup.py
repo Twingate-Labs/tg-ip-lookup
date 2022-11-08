@@ -12,6 +12,7 @@ class CloudLookup:
         data_dir = os.path.join(pkg_dir, 'data')
         self.networks = CloudLookup.__load_data(data_dir)
         mm_asn_file = os.path.join(data_dir, 'GeoLite2-ASN.mmdb')
+        # TODO: MM db needs to be closed - not an immediate problem
         self.mm_asn_reader = geoip2.database.Reader(mm_asn_file)
 
     @staticmethod
