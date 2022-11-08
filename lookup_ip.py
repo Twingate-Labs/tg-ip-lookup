@@ -6,8 +6,8 @@ def main(ip):
     cl = CloudLookup()
     if info := cl.lookup(ip):
         print(info)
-
-    print('Not found')
+    else:
+        print('Not found')
 
 
 if __name__ == "__main__":

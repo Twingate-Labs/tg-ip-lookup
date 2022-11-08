@@ -22,6 +22,7 @@ class CloudLookup:
 
     def lookup(self, ip):
         ip_address = ipaddress.IPv4Address(ip)
+        # Not the most efficient way to store or search but it is ok enough
         for network in self.networks:
             if ip_address in network:
                 return self.networks[network]
