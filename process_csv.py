@@ -30,7 +30,6 @@ def main(in_file, out_file, ip_field='external ip'):
         write_fields.extend(['provider', 'region', 'asn_org'])
         writer = csv.DictWriter(temp_file, fieldnames=write_fields)
         writer.writeheader()
-        # skip header
         for csv_row in reader:
             csv_row = process_row(csv_row)
             writer.writerow(csv_row)
