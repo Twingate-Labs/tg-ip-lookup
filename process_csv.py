@@ -21,11 +21,13 @@ def main(in_file, out_file, ip_field='external ip'):
             row['asn_org'] = info.get('asn_org', '')
         return row
 
-    with open(out_file, 'w') as out, open(in_file, 'r') as csvfile:
+    temp_file = NamedTemporaryFile(mode='w', delete=False)
+
+    with open(in_file, 'r') as csvfile, temp_file:
         bar = IncrementalBar('Rows', max=len(csvfile.readlines())-1)
         csvfile.seek(0)
         reader = csv.DictReader(csvfile, fieldnames=read_fields)
-        writer = csv.DictWriter(out, fieldnames=write_fields)
+        writer = csv.DictWriter(temp_file, fieldnames=write_fields)
         writer.writeheader()
         # skip header
         next(reader)
@@ -34,6 +36,7 @@ def main(in_file, out_file, ip_field='external ip'):
             writer.writerow(csv_row)
             bar.next()
     bar.finish()
+    shutil.move(temp_file.name, out_file)
 
 
 if __name__ == "__main__":
