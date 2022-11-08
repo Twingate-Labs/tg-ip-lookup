@@ -21,7 +21,7 @@ This repository contains python3 code to find out which public cloud an IP addre
 * Vultr
 * Scaleway
 * Fly.io
-* Starlink
+* Starlink (yes ok, not a cloud but it is up in the clouds right?)
 
 ### How it works
 For AWS, GCP, Azure and OCI this looks up the IPs using the publicly published IP ranges by these providers.
