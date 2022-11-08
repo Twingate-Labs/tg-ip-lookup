@@ -7,10 +7,6 @@ from cloudlookup import CloudLookup
 from progress.bar import IncrementalBar
 
 
-read_fields = ['tenant id', 'tenant slug', 'network', 'connector', 'external ip']
-write_fields = ['tenant id', 'tenant slug', 'network', 'connector', 'external ip', 'provider', 'region', 'asn_org']
-
-
 def main(in_file, out_file, ip_field='external ip'):
     cl = CloudLookup()
 
@@ -26,11 +22,16 @@ def main(in_file, out_file, ip_field='external ip'):
     with open(in_file, 'r') as csvfile, temp_file:
         bar = IncrementalBar('Rows', max=len(csvfile.readlines())-1)
         csvfile.seek(0)
-        reader = csv.DictReader(csvfile, fieldnames=read_fields)
+        reader = csv.DictReader(csvfile)
+        read_fields = reader.fieldnames
+        if ip_field not in read_fields:
+            print(f'Column "{ip_field}" not found in file "{in_file}".')
+            return
+        write_fields = read_fields.copy()
+        write_fields.extend(['provider', 'region', 'asn_org'])
         writer = csv.DictWriter(temp_file, fieldnames=write_fields)
         writer.writeheader()
         # skip header
-        next(reader)
         for csv_row in reader:
             csv_row = process_row(csv_row)
             writer.writerow(csv_row)
