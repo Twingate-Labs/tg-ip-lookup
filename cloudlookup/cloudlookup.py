@@ -13,8 +13,9 @@ class CloudLookup:
         data_dir = os.path.join(pkg_dir, 'data')
         self.networks = CloudLookup.__load_data(data_dir)
         mm_asn_file = os.path.join(data_dir, 'GeoLite2-ASN.mmdb')
-        self.mm_asn_reader = geoip2.database.Reader(mm_asn_file)
-        self._finalizer = weakref.finalize(self, self.mm_asn_reader.close)
+        if os.path.isfile(mm_asn_file):
+            self.mm_asn_reader = geoip2.database.Reader(mm_asn_file)
+            self._finalizer = weakref.finalize(self, self.mm_asn_reader.close)
 
     def __enter__(self):
         return self
@@ -32,9 +33,9 @@ class CloudLookup:
             if provider := self.networks.get(ip_network):
                 return provider
             ip_network = ip_network.supernet(1)
-
-        asn_response = self.mm_asn_reader.asn(ip)
-        return self.__asn_org_to_provider(asn_response.autonomous_system_organization)
+        if hasattr(self, 'mm_asn_reader'):
+            asn_response = self.mm_asn_reader.asn(ip)
+            return self.__asn_org_to_provider(asn_response.autonomous_system_organization)
 
     # This is a naive lookup
     def lookup_old(self, ip):
@@ -43,9 +44,9 @@ class CloudLookup:
         for network in self.networks:
             if ip_address in network:
                 return self.networks[network]
-
-        asn_response = self.mm_asn_reader.asn(ip)
-        return self.__asn_org_to_provider(asn_response.autonomous_system_organization)
+        if hasattr(self, 'mm_asn_reader'):
+            asn_response = self.mm_asn_reader.asn(ip)
+            return self.__asn_org_to_provider(asn_response.autonomous_system_organization)
 
     @staticmethod
     def __load_data(data_dir) -> OrderedDict:
@@ -54,7 +55,8 @@ class CloudLookup:
             return pickle.load(f)
 
     def close(self):
-        self._finalizer()
+        if hasattr(self, '_finalizer'):
+            self._finalizer()
 
     @staticmethod
     def __asn_org_to_provider(asn_org, other_label=''):

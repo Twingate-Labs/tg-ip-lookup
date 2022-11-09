@@ -67,11 +67,13 @@ def lookup_microsoft_download_url(url):
 def main(data_dir, max_mind_key):
     networks = OrderedDict()
 
+    print("Processing AWS ranges...")
     aws_info = load_networks('https://ip-ranges.amazonaws.com/ip-ranges.json',
                              'from_items(zip( prefixes[?ip_prefix].ip_prefix, prefixes[?ip_prefix].{provider: \'AWS\', region: region, service: service} ))')
     for [k, v] in aws_info:
         networks[k] = v
 
+    print("Processing GCP ranges...")
     gcp_info = load_networks('https://www.gstatic.com/ipranges/cloud.json',
                              'from_items(zip( prefixes[?ipv4Prefix].ipv4Prefix, prefixes[?ipv4Prefix].{provider: \'GCP\', region: scope} ))')
     for [k, v] in gcp_info:
@@ -79,6 +81,7 @@ def main(data_dir, max_mind_key):
 
     # Azure See https://learn.microsoft.com/en-us/azure/virtual-network/service-tags-overview
     # Azure Public
+    print("Processing Azure ranges...")
     azure_public_info = load_networks(lookup_microsoft_download_url('https://www.microsoft.com/en-us/download/confirmation.aspx?id=56519'),
                                       'values[].properties | @[].{s: store(systemService, \'service\'), r: store(region, \'region\'), a: addressPrefixes[?contains(@, \'.\')][@, '
                                       '{provider: \'Azure (Public)\', service: fetch(\'service\'), region: fetch(\'region\')}]} | sort_by(@[], &r) | from_items(@[].a[])')
@@ -92,7 +95,7 @@ def main(data_dir, max_mind_key):
     for [k, v] in azure_usgov_info:
         networks[k] = v
 
-    # Azure China 21Vianet
+    # Azure China 21 Vianet
     azure_china_info = load_networks(lookup_microsoft_download_url('https://www.microsoft.com/en-us/download/confirmation.aspx?id=57062'),
                                       'values[].properties | @[].{s: store(systemService, \'service\'), r: store(region, \'region\'), a: addressPrefixes[?contains(@, \'.\')][@, '
                                       '{provider: \'Azure (China)\', service: fetch(\'service\'), region: fetch(\'region\')}]} | sort_by(@[], &r) | from_items(@[].a[])')
@@ -106,6 +109,7 @@ def main(data_dir, max_mind_key):
     for [k, v] in azure_germany_info:
         networks[k] = v
 
+    print("Processing OCI ranges...")
     # Oracle Cloud - see https://docs.oracle.com/en-us/iaas/Content/General/Concepts/addressranges.htm
     oci_info = load_networks('https://docs.oracle.com/en-us/iaas/tools/public_ip_ranges.json',
                              'regions[].{r: store(region, \'region\'), a: cidrs[].[cidr, {provider: \'OCI\', region: fetch(\'region\')}]} | from_items(@[].a[])')
@@ -121,15 +125,18 @@ def main(data_dir, max_mind_key):
     #     networks[k] = v
 
     # MaxMind ASN Db
-    max_mind_url = f'https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-ASN&license_key={max_mind_key}&suffix=tar.gz'
-    with requests.get(max_mind_url, stream=True) as response, NamedTemporaryFile(mode='wb', delete=True) as temp_file:
-        if response.status_code == 200:
-            temp_file.write(response.raw.read())
-            with tarfile.open(name=temp_file.name, mode='r:gz') as tar_file:
-                for member in tar_file.getmembers():
-                    if member.isfile():
-                        member.path = '/'.join(member.path.split('/')[1:])
-                        tar_file.extract(member, data_dir)
+    if max_mind_key is not None:
+        max_mind_url = f'https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-ASN&license_key={max_mind_key}&suffix=tar.gz'
+        with requests.get(max_mind_url, stream=True) as response, NamedTemporaryFile(mode='wb', delete=True) as temp_file:
+            if response.status_code == 200:
+                temp_file.write(response.raw.read())
+                with tarfile.open(name=temp_file.name, mode='r:gz') as tar_file:
+                    for member in tar_file.getmembers():
+                        if member.isfile():
+                            member.path = '/'.join(member.path.split('/')[1:])
+                            tar_file.extract(member, data_dir)
+    else:
+        print('MaxMind key not specified, skipping.')
 
     output_file = os.path.join(data_dir, 'networks.pickle')
     with open(output_file, 'wb') as f:
@@ -138,7 +145,7 @@ def main(data_dir, max_mind_key):
 
 if __name__ == '__main__':
     parser = ArgumentParser()
-    parser.add_argument('max_mind_key', help='MaxMind license key')
+    parser.add_argument('max_mind_key', nargs='?', help='MaxMind license key', default=None)
     args = parser.parse_args()
 
     pkg_dir = os.path.abspath(os.path.dirname(__file__))
