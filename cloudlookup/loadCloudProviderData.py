@@ -126,6 +126,7 @@ def main(data_dir, max_mind_key):
 
     # MaxMind ASN Db
     if max_mind_key is not None:
+        print("Downloading MaxMind GeoLite ASN database...")
         max_mind_url = f'https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-ASN&license_key={max_mind_key}&suffix=tar.gz'
         with requests.get(max_mind_url, stream=True) as response, NamedTemporaryFile(mode='wb', delete=True) as temp_file:
             if response.status_code == 200:
