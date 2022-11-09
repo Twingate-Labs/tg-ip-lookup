@@ -14,7 +14,7 @@ class CloudLookup:
         self.networks = CloudLookup.__load_data(data_dir)
         mm_asn_file = os.path.join(data_dir, 'GeoLite2-ASN.mmdb')
         self.mm_asn_reader = geoip2.database.Reader(mm_asn_file)
-        self._finalizer = weakref.finalize(self, self.mm_asn_reader.close)
+        self._finalizer = weakref.finalize(self, self.close)
 
     def __enter__(self):
         return self
