@@ -15,13 +15,19 @@ class CloudLookup:
         # TODO: MM db needs to be closed - not an immediate problem
         self.mm_asn_reader = geoip2.database.Reader(mm_asn_file)
 
-    @staticmethod
-    def __load_data(data_dir) -> OrderedDict:
-        data_file = os.path.join(data_dir, 'networks.pickle')
-        with open(data_file, 'rb') as f:
-            return pickle.load(f)
-
     def lookup(self, ip):
+        ip_network = ipaddress.IPv4Network(ip)
+
+        while ip_network.prefixlen:
+            if ip_network in self.networks:
+                return self.networks[ip_network]
+            ip_network = ip_network.supernet(1)
+
+        asn_response = self.mm_asn_reader.asn(ip)
+        return self.__asn_org_to_provider(asn_response.autonomous_system_organization)
+
+    # This is a naiive lookup
+    def lookup_old(self, ip):
         ip_address = ipaddress.IPv4Address(ip)
         # Not the most efficient way to store or search but it is ok enough
         for network in self.networks:
@@ -29,8 +35,17 @@ class CloudLookup:
                 return self.networks[network]
 
         asn_response = self.mm_asn_reader.asn(ip)
-        provider = ''
-        asn_org = asn_response.autonomous_system_organization
+        return self.__asn_org_to_provider(asn_response.autonomous_system_organization)
+
+    @staticmethod
+    def __load_data(data_dir) -> OrderedDict:
+        data_file = os.path.join(data_dir, 'networks.pickle')
+        with open(data_file, 'rb') as f:
+            return pickle.load(f)
+
+    @staticmethod
+    def __asn_org_to_provider(asn_org, other_label=''):
+        provider = other_label
         # Look away
         if asn_org.startswith('Hetzner'):
             provider = 'Hetzner'
@@ -54,5 +69,3 @@ class CloudLookup:
             provider = 'Fly.io'
 
         return {'provider': provider, 'region': '', 'asn_org': asn_org}
-        pass
-

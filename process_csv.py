@@ -1,5 +1,6 @@
 import csv
 import shutil
+import time
 from argparse import ArgumentParser
 from tempfile import NamedTemporaryFile
 
@@ -19,6 +20,7 @@ def main(in_file, out_file, ip_field='external ip'):
 
     temp_file = NamedTemporaryFile(mode='w', delete=False)
 
+    start_time = time.time()
     with open(in_file, 'r') as csv_file, temp_file:
         bar = IncrementalBar('Rows', max=len(csv_file.readlines())-1)
         csv_file.seek(0)
@@ -35,6 +37,8 @@ def main(in_file, out_file, ip_field='external ip'):
             writer.writerow(csv_row)
             bar.next()
     bar.finish()
+    elapsed_time = time.time() - start_time
+    print('Execution time:', time.strftime("%H:%M:%S", time.gmtime(elapsed_time)))
     shutil.move(temp_file.name, out_file)
 
 
