@@ -9,19 +9,11 @@ from progress.bar import IncrementalBar
 
 
 def main(in_file, out_file, ip_field='external ip'):
-    cl = CloudLookup()
-
-    def process_row(row):
-        if info := cl.lookup(row[ip_field]):
-            row['provider'] = info.get('provider', '')
-            row['region'] = info.get('region', '')
-            row['asn_org'] = info.get('asn_org', '')
-        return row
 
     temp_file = NamedTemporaryFile(mode='w', delete=False)
 
     start_time = time.time()
-    with open(in_file, 'r') as csv_file, temp_file:
+    with open(in_file, 'r') as csv_file, CloudLookup() as cl, temp_file:
         bar = IncrementalBar('Rows', max=len(csv_file.readlines())-1)
         csv_file.seek(0)
         reader = csv.DictReader(csv_file)
@@ -33,13 +25,15 @@ def main(in_file, out_file, ip_field='external ip'):
         writer = csv.DictWriter(temp_file, fieldnames=write_fields)
         writer.writeheader()
         for csv_row in reader:
-            csv_row = process_row(csv_row)
+            if info := cl.lookup(csv_row[ip_field]):
+                csv_row['provider'] = info.get('provider', '')
+                csv_row['region'] = info.get('region', '')
+                csv_row['asn_org'] = info.get('asn_org', '')
             writer.writerow(csv_row)
             bar.next()
     bar.finish()
     elapsed_time = time.time() - start_time
     print('Execution time:', time.strftime("%H:%M:%S", time.gmtime(elapsed_time)))
-    cl.close()
     shutil.move(temp_file.name, out_file)
 
 
