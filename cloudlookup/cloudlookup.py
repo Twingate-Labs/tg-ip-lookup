@@ -19,6 +19,7 @@ class CloudLookup:
         # Inspired from: https://netaddr.readthedocs.io/en/latest/_modules/netaddr/ip/sets.html#IPSet.__contains__ :
         # Iterating over all possible supernets loops at most 32 times for IPv4 or 128 times for IPv6,
         # no matter how many CIDRs this object contains.
+        # See also: https://discuss.python.org/t/ipset-in-scope-for-stdlib-ipaddress/7147
         ip_network = ipaddress.IPv4Network(ip)
         while ip_network.prefixlen:
             if ip_network in self.networks:
