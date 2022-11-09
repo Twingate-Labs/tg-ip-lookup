@@ -22,8 +22,8 @@ class CloudLookup:
         # See also: https://discuss.python.org/t/ipset-in-scope-for-stdlib-ipaddress/7147
         ip_network = ipaddress.IPv4Network(ip)
         while ip_network.prefixlen:
-            if ip_network in self.networks:
-                return self.networks[ip_network]
+            if provider := self.networks.get(ip_network):
+                return provider
             ip_network = ip_network.supernet(1)
 
         asn_response = self.mm_asn_reader.asn(ip)
