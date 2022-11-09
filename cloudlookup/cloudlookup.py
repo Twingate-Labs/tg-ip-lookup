@@ -16,8 +16,10 @@ class CloudLookup:
         self.mm_asn_reader = geoip2.database.Reader(mm_asn_file)
 
     def lookup(self, ip):
+        # Inspired from: https://netaddr.readthedocs.io/en/latest/_modules/netaddr/ip/sets.html#IPSet.__contains__ :
+        # Iterating over all possible supernets loops at most 32 times for IPv4 or 128 times for IPv6,
+        # no matter how many CIDRs this object contains.
         ip_network = ipaddress.IPv4Network(ip)
-
         while ip_network.prefixlen:
             if ip_network in self.networks:
                 return self.networks[ip_network]
@@ -29,7 +31,7 @@ class CloudLookup:
     # This is a naiive lookup
     def lookup_old(self, ip):
         ip_address = ipaddress.IPv4Address(ip)
-        # Not the most efficient way to store or search but it is ok enough
+        # Not the most efficient way to store or search, but it is ok enough
         for network in self.networks:
             if ip_address in network:
                 return self.networks[network]
