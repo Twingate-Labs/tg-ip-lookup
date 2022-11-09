@@ -39,6 +39,7 @@ def main(in_file, out_file, ip_field='external ip'):
     bar.finish()
     elapsed_time = time.time() - start_time
     print('Execution time:', time.strftime("%H:%M:%S", time.gmtime(elapsed_time)))
+    cl.close()
     shutil.move(temp_file.name, out_file)
 
 

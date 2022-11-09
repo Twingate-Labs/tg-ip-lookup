@@ -3,6 +3,7 @@ import pickle
 import os
 import ipaddress
 import geoip2.database
+import weakref
 
 
 class CloudLookup:
@@ -12,8 +13,14 @@ class CloudLookup:
         data_dir = os.path.join(pkg_dir, 'data')
         self.networks = CloudLookup.__load_data(data_dir)
         mm_asn_file = os.path.join(data_dir, 'GeoLite2-ASN.mmdb')
-        # TODO: MM db needs to be closed - not an immediate problem
         self.mm_asn_reader = geoip2.database.Reader(mm_asn_file)
+        self._finalizer = weakref.finalize(self, self.mm_asn_reader.close)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close()
 
     def lookup(self, ip):
         # Inspired from: https://netaddr.readthedocs.io/en/latest/_modules/netaddr/ip/sets.html#IPSet.__contains__ :
@@ -45,6 +52,9 @@ class CloudLookup:
         data_file = os.path.join(data_dir, 'networks.pickle')
         with open(data_file, 'rb') as f:
             return pickle.load(f)
+
+    def close(self):
+        self._finalizer()
 
     @staticmethod
     def __asn_org_to_provider(asn_org, other_label=''):

@@ -3,11 +3,11 @@ from cloudlookup import CloudLookup
 
 
 def main(ip):
-    cl = CloudLookup()
-    if info := cl.lookup(ip):
-        print(info)
-    else:
-        print('Not found')
+    with CloudLookup() as cl:
+        if info := cl.lookup(ip):
+            print(info)
+        else:
+            print('Not found')
 
 
 if __name__ == "__main__":
