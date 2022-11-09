@@ -3,6 +3,7 @@ from cloudlookup import CloudLookup
 
 
 def main(ip):
+    # Constructing a CloudLookup is expensive so in real-world scenarios try to reuse instances
     with CloudLookup() as cl:
         if info := cl.lookup(ip):
             print(info)
