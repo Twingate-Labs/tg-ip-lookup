@@ -142,6 +142,7 @@ def main(data_dir, max_mind_key):
     output_file = os.path.join(data_dir, 'networks.pickle')
     with open(output_file, 'wb') as f:
         pickle.dump(networks, f)
+    print(f'Data saved to "{data_dir}"')
 
 
 if __name__ == '__main__':
