@@ -29,7 +29,7 @@ class CloudLookup:
         asn_response = self.mm_asn_reader.asn(ip)
         return self.__asn_org_to_provider(asn_response.autonomous_system_organization)
 
-    # This is a naiive lookup
+    # This is a naive lookup
     def lookup_old(self, ip):
         ip_address = ipaddress.IPv4Address(ip)
         # Not the most efficient way to store or search, but it is ok enough
