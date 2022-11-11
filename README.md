@@ -1,6 +1,6 @@
 # Lookup an IP address to find out which public cloud it originates from
 
-This repository contains python3 code to find out which public cloud an IP addres originates from.
+This repository contains python3 code to find out which public cloud an IP address originates from.
 
 ## Requirements
 * Python3 (3.11)
