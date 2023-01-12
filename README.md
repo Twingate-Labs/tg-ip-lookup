@@ -5,7 +5,7 @@ This repository contains python3 code to find out which public cloud an IP addre
 ## Requirements
 * Python3 (3.11)
 * MaxMind license key (for [GeoLite2 ASN](https://dev.maxmind.com/geoip/docs/databases/asn) database). *This database is free subject to license restrictions by MaxMind*. Sign up [here](https://www.maxmind.com/en/geolite2/signup).
-* see also [requirements.txt](requirements.txt)
+* see also [requirements.txt](src/tg-ip-lookup/requirements.txt)
 
 ## Supported Clouds
 * Amazon Web Services (AWS)
